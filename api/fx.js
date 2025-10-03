@@ -4,9 +4,9 @@
 // POST /api/fx  { "date":"YYYY-MM-DD", "coverage":"full|majors|extended", "symbols":["EURUSD","GBPUSD", ...] }
 //
 // IMPORTANT:
-// 1) In Vercel → Project → Settings → Environment Variables, create:
-//    Key = WSJ_COOKIE, Value = <your full WSJ cookie string>, Scope = Production (and Preview if desired)
-// 2) This function only uses direct XXXUSD pairs (no reciprocals).
+// - In Vercel → Project → Settings → Environment Variables, create:
+//   Key = WSJ_COOKIE, Value = <your full WSJ cookie string>, Scope = Production/Preview
+// - This function only uses direct XXXUSD pairs (no reciprocals).
 
 const DEFAULT_SEED = [
   "EURUSD","GBPUSD","AUDUSD","NZDUSD","JPYUSD","CADUSD","CHFUSD","SEKUSD","NOKUSD","DKKUSD",
@@ -47,7 +47,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: "date must be YYYY-MM-DD" });
     }
 
-    // ---- Resolve trading day (NY): if Sat/Sun → prior Friday) ----
+    // ---- Resolve trading day (NY). If Sat/Sun → prior Friday ----
     const resolvedISO = priorBizIfWeekend(date);
     const mdy = toMMDDYYYY(resolvedISO);
 
@@ -93,7 +93,7 @@ function parseSymbolList(s) {
 function clean(arr) { return arr.map(v => String(v).trim()).filter(Boolean); }
 
 function priorBizIfWeekend(iso) {
-  const d = new Date(iso + "T00:00:00-04:00"); // NY offset safe enough for daily roll
+  const d = new Date(iso + "T00:00:00-04:00"); // NY offset safe enough for daily
   const wd = d.getDay(); // 0 Sun .. 6 Sat
   if (wd === 6) d.setDate(d.getDate() - 1); // Sat -> Fri
   if (wd === 0) d.setDate(d.getDate() - 2); // Sun -> Fri
@@ -128,7 +128,7 @@ async function fetchWSJ(symbolRaw, mdy, iso) {
         "User-Agent": UA,                 // browser-like UA
         "Accept": "text/csv, */*;q=0.1",
         "Referer": `https://www.wsj.com/market-data/quotes/FX/${symbol}/historical-prices`,
-        "Cookie": process.env.WSJ_COOKIE || ""   // <-- your WSJ cookie from Vercel env
+        "Cookie": process.env.WSJ_COOKIE || ""   // <-- add WSJ_COOKIE in Vercel env
       }
     });
 
@@ -181,4 +181,4 @@ function parseWSJCSV(csv, isoWanted) {
     }
   }
   return null;
-}
+                    }
